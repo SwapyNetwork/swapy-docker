@@ -1,17 +1,19 @@
 FROM ubuntu:16.04
 MAINTAINER icaro[at]swapy.network
 
-ARG TAG
+ARG TAG=0.0.2-ALPHA
 ENV SWAPY_EXCHANGE_REPOSITORY https://github.com/swapynetwork/swapy-exchange
-ENV NETWORK_NAME ""
-ENV NETWORK_ID ""
-ENV HTTP_PROVIDER "https://"".infura.io/yourKey"
+ENV NETWORK_NAME "ropsten or rinkeby"
+ENV NETWORK_ID "3 or 4"
+ENV HTTP_PROVIDER "https://${NETWORK_NAME}.infura.io/yourKey"
 ENV WS_PROVIDER ""
 ENV TEST_RPC_PROVIDER "http://localhost:8545"
 ENV DAPP_ENV test
+ENV ENV_CONTENT "{\"HTTP_PROVIDER\": \"${HTTP_PROVIDER}\", \"TEST_RPC_PROVIDER\": \"${TEST_RPC_PROVIDER}\", \"WS_PROVIDER\": \"${WS_PROVIDER}\", \"BLOCK_EXPLORER_URL\": \"https://${NETWORK_NAME}.etherscan.io/address/\", \"ENV\": \"${DAPP_ENV}\", \"NETWORK_ID\": \"${NETWORK_ID}\", \"NETWORK_NAME\": \"${NETWORK_NAME}\"}"
 ENV SWAPY_USER swapy
 ENV SWAPY_PASSWORD 123456
 ENV SWAPY_HOME /home/${SWAPY_USER}
+
 
 # Install environment dependencies
 RUN apt-get update && apt-get install -y nano vim git curl make gcc build-essential g++ apt-utils
@@ -41,7 +43,7 @@ RUN mkdir ./www && \
     git clone ${SWAPY_EXCHANGE_REPOSITORY} && \
     cd ./swapy-exchange && \
     git checkout tags/${TAG} && \
-    printf '{"HTTP_PROVIDER": "${HTTP_PROVIDER}", "TEST_RPC_PROVIDER": "${TEST_RPC_PROVIDER}", "WS_PROVIDER": "${WS_PROVIDER}", "BLOCK_EXPLORER_URL": "https://${NETWORK_NAME}.etherscan.io/address/", "ENV": "${DAPP_ENV}", "NETWORK_ID": "${NETWORK_ID}", "NETWORK_NAME": "${NETWORK_NAME}"}' >> env.json && \
+    echo "${ENV_CONTENT}" > env.json && \
     npm install
 EXPOSE 4200
 WORKDIR ${SWAPY_HOME}/www/swapy-exchange
